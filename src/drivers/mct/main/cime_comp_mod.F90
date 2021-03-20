@@ -4188,9 +4188,9 @@ contains
        ! atm/ocn flux on either atm or ocean grid
        call cime_run_atmocn_fluxes(hashint)
 
-       ! ocn prep-merge (cesm1_mod or cesm1_mod_tight)
+#if COMPARE_TO_NUOPC
+       !This is need to compare to nuopc
        if (ocn_prognostic) then
-          !This is need to compare to nuopc
           if (.not. skip_ocean_run) then
              ! ocn prep-merge
              xao_ox => prep_aoflux_get_xao_ox()
@@ -4200,6 +4200,16 @@ contains
              call prep_ocn_accum(timer='CPL:atmocnp_accum')
           end if
        end if
+#else
+       if (ocn_prognostic) then
+          ! ocn prep-merge
+          xao_ox => prep_aoflux_get_xao_ox()
+          call prep_ocn_mrg(infodata, fractions_ox, xao_ox=xao_ox, timer_mrg='CPL:atmocnp_mrgx2o')
+
+          ! Accumulate ocn inputs - form partial sum of tavg ocn inputs (virtual "send" to ocn)
+          call prep_ocn_accum(timer='CPL:atmocnp_accum')
+       end if
+#endif
 
        !----------------------------------------------------------
        ! ocn albedos
