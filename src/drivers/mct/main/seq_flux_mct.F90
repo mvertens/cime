@@ -739,9 +739,11 @@ contains
 
   !===============================================================================
 
-  subroutine seq_flux_ocnalb_mct( infodata, ocn, a2x_o, fractions_o, xao_o )
+  subroutine seq_flux_ocnalb_mct( infodata, ocn, a2x_o, fractions_o, xao_o, clock )
 
     !-----------------------------------------------------------------------
+    !
+    use ESMF
     !
     ! Arguments
     !
@@ -750,6 +752,7 @@ contains
     type(mct_aVect)         , intent(in)    :: a2x_o
     type(mct_aVect)         , intent(inout) :: fractions_o
     type(mct_aVect)         , intent(inout) :: xao_o
+    type (ESMF_Clock)       , intent(in)    :: clock      ! driver clock
     !
     ! Local variables
     !
@@ -777,6 +780,8 @@ contains
     integer(in)         :: kx,kr                ! fractions indices
     integer(in)         :: klat,klon       ! field indices
     logical             :: update_alb           ! was albedo updated
+    type(ESMF_Time)     :: currTime
+    logical             :: read_restart         ! .true. => model starting from restart
     logical,save        :: first_call = .true.
     !
     character(*),parameter :: subName =   '(seq_flux_ocnalb_mct) '
@@ -819,7 +824,6 @@ contains
           lats(n) = dom_o%data%rAttr(klat,n)
           lons(n) = dom_o%data%rAttr(klon,n)
        enddo
-       first_call = .false.
     endif
 
     if (flux_albav) then
@@ -872,8 +876,20 @@ contains
        ! Solar declination
        ! Will only do albedo calculation if nextsw_cday is not -1.
 
-       call seq_infodata_GetData(infodata,nextsw_cday=nextsw_cday,orb_eccen=eccen, &
-            orb_mvelpp=mvelpp, orb_lambm0=lambm0, orb_obliqr=obliqr)
+#ifdef COMPARE_TO_NUOPC
+       call seq_infodata_GetData(infodata, read_restart=read_restart)
+       if (first_call .and. .not. read_restart) then
+          call ESMF_ClockGet( clock, currTime=currTime)
+          call ESMF_TimeGet( currTime, dayOfYear_r8=nextsw_cday)
+       else
+          call seq_infodata_GetData(infodata, nextsw_cday=nextsw_cday)
+       end if
+#else        
+       call seq_infodata_GetData(infodata, nextsw_cday=nextsw_cday)
+#endif
+       call seq_infodata_GetData(infodata, &
+            orb_eccen=eccen, orb_mvelpp=mvelpp, orb_lambm0=lambm0, orb_obliqr=obliqr)
+
        if (nextsw_cday >= -0.5_r8) then
           calday = nextsw_cday
           call shr_orb_decl(calday, eccen, mvelpp,lambm0, obliqr, delta, eccf)
@@ -916,6 +932,8 @@ contains
        kr = mct_aVect_indexRA(fractions_o,"ofrad")
        fractions_o%rAttr(kr,:) = fractions_o%rAttr(kx,:)
     endif
+
+    first_call = .false.
 
   end subroutine seq_flux_ocnalb_mct
 

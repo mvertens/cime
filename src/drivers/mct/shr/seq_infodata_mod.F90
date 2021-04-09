@@ -244,6 +244,7 @@ MODULE seq_infodata_mod
      !--- set by driver and may be time varying
      logical                 :: glc_valid_input  ! is valid accumulated data being sent to prognostic glc
      character(SHR_KIND_CL)  :: model_doi_url
+     logical                 :: skip_ocn_run_firstpass
   end type seq_infodata_type
 
   ! --- public interfaces --------------------------------------------------------
@@ -422,6 +423,7 @@ CONTAINS
     logical                :: mct_usevector      ! flag for mct vector
     real(shr_kind_r8)      :: max_cplstep_time   ! abort if cplstep time exceeds this value
     character(SHR_KIND_CL) :: model_doi_url
+    logical                :: skip_ocn_run_firstpass ! only used if COMPARE_TO_NUOPC is defined
 
     namelist /seq_infodata_inparm/  &
          cime_model, case_desc, case_name, start_type, tchkpt_dir,     &
@@ -460,7 +462,7 @@ CONTAINS
          eps_oarea, esmf_map_flag,                         &
          reprosum_use_ddpdd, reprosum_allow_infnan,        &
          reprosum_diffmax, reprosum_recompute,             &
-         mct_usealltoall, mct_usevector, max_cplstep_time, model_doi_url
+         mct_usealltoall, mct_usevector, max_cplstep_time, model_doi_url, skip_ocn_run_firstpass
 
     !-------------------------------------------------------------------------------
 
@@ -578,6 +580,7 @@ CONTAINS
        mct_usevector         = .false.
        max_cplstep_time      = 0.0
        model_doi_url        = 'unset'
+       skip_ocn_run_firstpass = .true.
 
        !---------------------------------------------------------------------------
        ! Read in namelist
@@ -777,6 +780,8 @@ CONTAINS
 
        infodata%max_cplstep_time = max_cplstep_time
        infodata%model_doi_url = model_doi_url
+       infodata%skip_ocn_run_firstpass = skip_ocn_run_firstpass
+
        !---------------------------------------------------------------
        ! check orbital mode, reset unused parameters, validate settings
        !---------------------------------------------------------------
@@ -1004,7 +1009,7 @@ CONTAINS
        eps_agrid, eps_aarea, eps_omask, eps_ogrid, eps_oarea,             &
        reprosum_use_ddpdd, reprosum_allow_infnan,                         &
        reprosum_diffmax, reprosum_recompute,                              &
-       mct_usealltoall, mct_usevector, max_cplstep_time, model_doi_url,   &
+       mct_usealltoall, mct_usevector, max_cplstep_time, model_doi_url, skip_ocn_run_firstpass, &
        glc_valid_input)
 
 
@@ -1183,6 +1188,7 @@ CONTAINS
     logical,                optional, intent(OUT) :: glc_g2lupdate           ! update glc2lnd fields in lnd model
     real(shr_kind_r8),      optional, intent(out) :: max_cplstep_time
     character(SHR_KIND_CL), optional, intent(OUT) :: model_doi_url
+    logical,                optional, intent(OUT) :: skip_ocn_run_firstpass
     logical,                optional, intent(OUT) :: glc_valid_input
 
     !----- local -----
@@ -1374,6 +1380,7 @@ CONTAINS
     if ( present(glc_g2lupdate)  ) glc_g2lupdate  = infodata%glc_g2lupdate
     if ( present(max_cplstep_time) ) max_cplstep_time = infodata%max_cplstep_time
     if ( present(model_doi_url) ) model_doi_url = infodata%model_doi_url
+    if ( present(skip_ocn_run_firstpass) ) skip_ocn_run_firstpass = infodata%skip_ocn_run_firstpass
 
     if ( present(glc_valid_input)) glc_valid_input = infodata%glc_valid_input
 
@@ -2195,6 +2202,7 @@ CONTAINS
     call shr_mpi_bcast(infodata%glc_g2lupdate,           mpicom)
     call shr_mpi_bcast(infodata%glc_valid_input,         mpicom)
     call shr_mpi_bcast(infodata%model_doi_url,           mpicom)
+    call shr_mpi_bcast(infodata%skip_ocn_run_firstpass,  mpicom)
     call shr_mpi_bcast(infodata%constant_zenith_deg,     mpicom)
 
   end subroutine seq_infodata_bcast

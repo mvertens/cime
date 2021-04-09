@@ -600,8 +600,17 @@ CONTAINS
                 !--- compute ice formed or melt potential ---
                 o2x%rAttr(kq,n) = (tfreeze(n) - o2x%rAttr(kt,n))*(cpsw*rhosw*hn)/dt  ! ice formed q>0
                 o2x%rAttr(kt,n) = max(tfreeze(n),o2x%rAttr(kt,n))                    ! reset temp
-                somtp(n) = o2x%rAttr(kt,n)                                           ! save temp
+             else
+                o2x%rAttr(kt    ,n) = 0.0_r8
+                o2x%rattr(ks    ,n) = 0.0_r8
+                o2x%rattr(kq    ,n) = 0.0_r8
+                o2x%rattr(ku    ,n) = 0.0_r8
+                o2x%rattr(kv    ,n) = 0.0_r8
+                o2x%rattr(kswp  ,n) = 0.0_r8
+                o2x%rattr(kdhdx ,n) = 0.0_r8
+                o2x%rattr(kdhdy ,n) = 0.0_r8
              endif
+             somtp(n) = o2x%rAttr(kt,n) ! save temp
           enddo
        endif   ! firstcall
 

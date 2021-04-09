@@ -71,6 +71,15 @@ def _create_drv_namelists(case, infile, confdir, nmlgen, files):
     #----------------------------------------------------
     nmlgen.init_defaults(infile, config)
 
+    #----------------------------------------------------
+    # Determine if will skip call to ocean on first run loop pass in initialization
+    #----------------------------------------------------
+    # Note that the following will only be used by cpl7 if #COMPARE_TO_NUOPC is defined
+    if case.get_value('COMP_OCN') != 'docn':
+        nmlgen.set_value('skip_ocn_run_firstpass' , value='.true.')
+    else:
+        nmlgen.set_value('skip_ocn_run_firstpass' , value='.false.')
+
     #--------------------------------
     # Overwrite: set brnch_retain_casename
     #--------------------------------

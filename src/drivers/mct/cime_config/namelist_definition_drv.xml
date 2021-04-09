@@ -257,6 +257,15 @@
     </values>
   </entry>
 
+  <entry id="skip_ocn_run_firstpass" skip_default_entry="true">
+    <type>logical</type>
+    <category>expdef</category>
+    <group>seq_infodata_inparm</group>
+    <desc>
+      if true, skip the ocean model first pass
+    </desc>
+  </entry>
+
   <entry id="aqua_planet">
     <type>logical</type>
     <category>expdef</category>

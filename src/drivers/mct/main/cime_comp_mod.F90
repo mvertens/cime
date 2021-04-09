@@ -1730,7 +1730,11 @@ contains
     ! set skip_ocean_run flag, used primarily for ocn run on first timestep
     ! use reading a restart as a surrogate from whether this is a startup run
 
+#if COMPARE_TO_NUOPC
+    call seq_infodata_GetData(infodata, skip_ocn_run_firstpass=skip_ocean_run)
+#else
     skip_ocean_run = .true.
+#endif
     if ( read_restart) skip_ocean_run = .false.
     ocnrun_count = 0
     cpl2ocn_first = .true.
@@ -2180,7 +2184,7 @@ contains
              eai = mod((exi-1),num_inst_atm) + 1
              xao_ox => prep_aoflux_get_xao_ox()        ! array over all instances
              a2x_ox => prep_ocn_get_a2x_ox()
-             call seq_flux_ocnalb_mct(infodata, ocn(1), a2x_ox(eai), fractions_ox(efi), xao_ox(exi))
+             call seq_flux_ocnalb_mct(infodata, ocn(1), a2x_ox(eai), fractions_ox(efi), xao_ox(exi), Eclock_d)
           enddo
 
           if (drv_threading) call seq_comm_setnthreads(nthreads_GLOID)
@@ -3895,7 +3899,7 @@ contains
        eai = mod((exi-1),num_inst_atm) + 1
        xao_ox => prep_aoflux_get_xao_ox()        ! array over all instances
        a2x_ox => prep_ocn_get_a2x_ox()
-       call seq_flux_ocnalb_mct(infodata, ocn(1), a2x_ox(eai), fractions_ox(efi), xao_ox(exi))
+       call seq_flux_ocnalb_mct(infodata, ocn(1), a2x_ox(eai), fractions_ox(efi), xao_ox(exi), Eclock_d)
     enddo
     call t_drvstopf  ('CPL:atmocnp_ocnalb', hashint=hashint(5))
 
@@ -4191,14 +4195,14 @@ contains
 #if COMPARE_TO_NUOPC
        !This is need to compare to nuopc
        if (ocn_prognostic) then
-          if (.not. skip_ocean_run) then
+          !if (.not. skip_ocean_run) then
              ! ocn prep-merge
              xao_ox => prep_aoflux_get_xao_ox()
              call prep_ocn_mrg(infodata, fractions_ox, xao_ox=xao_ox, timer_mrg='CPL:atmocnp_mrgx2o')
 
              ! Accumulate ocn inputs - form partial sum of tavg ocn inputs (virtual "send" to ocn)
              call prep_ocn_accum(timer='CPL:atmocnp_accum')
-          end if
+          !end if
        end if
 #else
        if (ocn_prognostic) then
