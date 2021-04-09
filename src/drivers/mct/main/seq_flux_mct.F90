@@ -884,7 +884,7 @@ contains
        else
           call seq_infodata_GetData(infodata, nextsw_cday=nextsw_cday)
        end if
-#else        
+#else
        call seq_infodata_GetData(infodata, nextsw_cday=nextsw_cday)
 #endif
        call seq_infodata_GetData(infodata, &
