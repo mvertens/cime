@@ -4195,14 +4195,14 @@ contains
 #if COMPARE_TO_NUOPC
        !This is need to compare to nuopc
        if (ocn_prognostic) then
-          !if (.not. skip_ocean_run) then
+          if (.not. skip_ocean_run) then
              ! ocn prep-merge
              xao_ox => prep_aoflux_get_xao_ox()
              call prep_ocn_mrg(infodata, fractions_ox, xao_ox=xao_ox, timer_mrg='CPL:atmocnp_mrgx2o')
 
              ! Accumulate ocn inputs - form partial sum of tavg ocn inputs (virtual "send" to ocn)
              call prep_ocn_accum(timer='CPL:atmocnp_accum')
-          !end if
+          end if
        end if
 #else
        if (ocn_prognostic) then
