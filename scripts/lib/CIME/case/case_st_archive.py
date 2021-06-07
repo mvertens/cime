@@ -405,8 +405,10 @@ def _archive_restarts_date_comp(case, casename, rundir, archive, archive_entry,
         compname = 'cpl'
     if compname == "cice6":
         compname = 'cice'
-    if compname == "ww3dev":
-        compname = 'ww3'
+#    if compname == "ww3dev":
+#        compname = 'ww3'
+#    if compname == "wwdev":
+#        compname = 'ww3'
 
     # get file_extension suffixes
     for suffix in archive.get_rest_file_extensions(archive_entry):

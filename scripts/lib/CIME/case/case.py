@@ -1044,7 +1044,7 @@ class Case(object):
         infile_node = files.get_child("entry", {"id":"ARCHIVE_SPEC_FILE"})
         infile = files.get_default_value(infile_node)
         infile = self.get_resolved_value(infile)
-        logger.debug("archive defaults located in {}".format(infile))
+        logger.info("archive defaults located in {}".format(infile))
         archive = Archive(infile=infile, files=files)
         archive.setup(env_archive, self._components, files=files)
 
