@@ -32,10 +32,10 @@ class Archive(ArchiveBase):
             arch_components.append('drv')
         if 'dart' not in arch_components and model == 'cesm':
             arch_components.append('dart')
-
+        print("arch_components are {}".format(arch_components))
         for comp in arch_components:
             infile = files.get_value("ARCHIVE_SPEC_FILE", {"component":comp})
-
+            print("archive for {} is {}".format(comp, infile))
             if infile is not None and os.path.isfile(infile):
                 arch = Archive(infile=infile, files=files)
                 specs = arch.get_optional_child(name="comp_archive_spec", attributes={"compname":comp})

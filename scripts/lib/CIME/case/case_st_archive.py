@@ -118,7 +118,7 @@ def _get_component_archive_entries(components, archive):
     case's compset components.
     """
     for compname in components:
-        logger.debug("compname is {} ".format(compname))
+        logger.debug("compname is {} components {}".format(compname, components))
         archive_entry = archive.get_entry(compname)
         if archive_entry is None:
             logger.debug("No entry found for {}".format(compname))
@@ -259,8 +259,9 @@ def _archive_history_files(archive, compclass, compname, histfiles_savein_rundir
 
     # archive history files - the only history files that kept in the
     # run directory are those that are needed for restarts
-    histfiles = archive.get_all_hist_files(casename, compname, rundir)
 
+    histfiles = archive.get_all_hist_files(casename, compname, rundir)
+    logger.debug("Histfiles are {}".format(histfiles))
     if histfiles:
         for histfile in histfiles:
             file_date = get_file_date(os.path.basename(histfile))
@@ -405,8 +406,6 @@ def _archive_restarts_date_comp(case, casename, rundir, archive, archive_entry,
         compname = 'cpl'
     if compname == "cice6":
         compname = 'cice'
-    if compname == "ww3dev":
-        compname = 'ww3'
 
     # get file_extension suffixes
     for suffix in archive.get_rest_file_extensions(archive_entry):
@@ -854,6 +853,7 @@ def test_env_archive(self, testdir="env_archive_test"):
         comp_expected = archive.get(comp_archive_spec, 'compname')
         if comp_expected == "ww3":
             comp_expected = "ww"
+
         comp_class = archive.get(comp_archive_spec, 'compclass').upper()
         if comp_class in components:
             components.remove(comp_class)
