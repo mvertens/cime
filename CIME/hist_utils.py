@@ -49,6 +49,7 @@ COMPARISON_FAILURE_COMMENT_OPTIONS = COMPARISON_COMMENT_OPTIONS - set(
 )
 
 NO_HIST_TESTS = ["IRT", "PFS", "TSC"]
+ALL_HIST_TESTS = ["MVK", "MVKO", "PGN", "TSC"]
 
 
 def _iter_model_file_substrs(case):
@@ -83,7 +84,6 @@ def copy_histfiles(case, suffix, match_suffix=None):
             )
 
             continue
-        comments += "  Copying hist files for model '{}'\n".format(model)
         test_hists = archive.get_latest_hist_files(
             casename, model, rundir, suffix=match_suffix, ref_case=ref_case
         )
@@ -93,6 +93,14 @@ def copy_histfiles(case, suffix, match_suffix=None):
             if not test_hist.endswith(".nc") or "once" in os.path.basename(test_hist):
                 logger.info("Will not compare non-netcdf file {}".format(test_hist))
                 continue
+            if model == "mom":
+                if "ocean_geometry" in test_hist:
+                    comments += "    skipping '{}'\n".format(test_hist)
+                    continue
+                if "mom6.ic" in test_hist:
+                    comments += "    skipping '{}'\n".format(test_hist)
+                    continue
+            comments += "  Copying hist files for model '{}'\n".format(model)
             new_file = "{}.{}".format(test_hist, suffix)
             if os.path.exists(new_file):
                 os.remove(new_file)
@@ -636,11 +644,16 @@ def _generate_baseline_impl(case, baseline_dir=None, allow_baseline_overwrite=Fa
     for model in _iter_model_file_substrs(case):
 
         comments += "  generating for model '{}'\n".format(model)
-
-        hists = archive.get_latest_hist_files(
-            testcase, model, rundir, ref_case=ref_case
-        )
-        logger.debug("latest_files: {}".format(hists))
+        if case.get_value("TESTCASE") in ALL_HIST_TESTS:
+            hists = archive.get_all_hist_files(
+                testcase, model, rundir, ref_case=ref_case
+            )
+            logger.debug("all_files: {}".format(hists))
+        else:
+            hists = archive.get_latest_hist_files(
+                testcase, model, rundir, ref_case=ref_case
+            )
+            logger.debug("latest_files: {}".format(hists))
         num_gen += len(hists)
 
         for hist in hists:
@@ -751,6 +764,9 @@ def get_ts_synopsis(comments):
 
     if comments == "" or "\n" not in comments:
         return comments
+
+    if comments.endswith("PASS"):
+        return ""
 
     # Empty synopsis when files are identicial
     if re.search(IDENTICAL, comments) is not None:

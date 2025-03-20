@@ -260,6 +260,7 @@ def _read_cime_config_file():
         "walltime",
         "job_queue",
         "allow_baseline_overwrite",
+        "skip_tests_with_existing_baselines",
         "wait",
         "force_procs",
         "force_threads",
@@ -1583,7 +1584,7 @@ def get_charge_account(machobj=None, project=None):
 
     >>> import CIME
     >>> import CIME.XML.machines
-    >>> machobj = CIME.XML.machines.Machines(machine="theta")
+    >>> machobj = CIME.XML.machines.Machines(machine="ubuntu-latest")
     >>> project = get_project(machobj)
     >>> charge_account = get_charge_account(machobj, project)
     >>> project == charge_account
