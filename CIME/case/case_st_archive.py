@@ -168,42 +168,59 @@ def _archive_rpointer_files(
     datename_is_last,
 ):
     ###############################################################################
-    if datename_is_last:
-        rpointers = glob.glob(
-            os.path.join(rundir, "rpointer.*" + _datetime_str(datename))
-        )
-        # Copy of all rpointer files for latest restart date
-        rpointers = glob.glob(os.path.join(rundir, "rpointer.*"))
-        for rpointer in rpointers:
-            safe_copy(
-                rpointer, os.path.join(archive_restdir, os.path.basename(rpointer))
-            )
-    else:
-        # Generate rpointer file(s) for interim restarts for the one datename and each
-        # possible value of ninst_strings
-        if save_interim_restart_files:
-            rpointers = glob.glob(
-                os.path.join(rundir, "rpointer.*" + _datetime_str(datename))
-            )
-            # If timestamped rpointers exist use them
-            if rpointers:
-                for rpointer in rpointers:
-                    safe_copy(
-                        rpointer,
-                        os.path.join(archive_restdir, os.path.basename(rpointer)),
-                    )
-            else:
-                # parse env_archive.xml to determine the rpointer files
-                # and contents for the given archive_entry tag
-                rpointer_items = archive.get_rpointer_contents(archive_entry)
 
-                # loop through the possible rpointer files and contents
-                for rpointer_file, rpointer_content in rpointer_items:
-                    temp_rpointer_file = rpointer_file
-                    temp_rpointer_content = rpointer_content
+    # parse env_archive.xml to determine the rpointer files
+    # and contents for the given archive_entry tag
+    # loop through the possible rpointer files and contents
+    rpointer_nodes = archive.get_children("rpointer", root=archive_entry)
+    for rpointer in rpointer_nodes:
+        file_node = archive.get_child("rpointer_file", root=rpointer)
+        temp_rpointer_file = archive.text(file_node)
+        content_node = archive.get_child("rpointer_content", root=rpointer)
+        temp_rpointer_content = archive.text(content_node)
+        rpointer_file = temp_rpointer_file.replace("$NINST_STRING", "*")
+        if rpointer_file == "unset":
+            continue
+        if "$DATENAME" in rpointer_file:
+            rpointer_file = rpointer_file.replace("$DATENAME", _datetime_str(datename))
+
+        expect(
+            not "$" in rpointer_file,
+            "Unrecognized expression in name {}".format(rpointer_file),
+        )
+        rpointers = glob.glob(rundir + "/" + rpointer_file)
+        if datename_is_last:
+            for rpfile in rpointers:
+                safe_copy(
+                    rpfile, os.path.join(archive_restdir, os.path.basename(rpfile))
+                )
+        else:
+            # Generate rpointer file(s) for interim restarts for the one datename and each
+            # possible value of ninst_strings
+            if save_interim_restart_files:
+                # If timestamped rpointers exist use them
+                if rpointers:
+                    for rpfile in rpointers:
+                        logger.info("moving interim rpointer_file {}".format(rpfile))
+                        shutil.move(
+                            rpfile,
+                            os.path.join(archive_restdir, os.path.basename(rpfile)),
+                        )
+                else:
 
                     # put in a temporary setting for ninst_strings if they are empty
                     # in order to have just one loop over ninst_strings below
+                    if ninst_strings:
+                        rpointer_content = temp_rpointer_content.replace(
+                            "$NINST_STRING", ninst_strings[0]
+                        )
+                    else:
+                        rpointer_content = temp_rpointer_content.replace(
+                            "$NINST_STRING", ""
+                        )
+                    rpointer_content = rpointer_content.replace(
+                        "$DATENAME", _datetime_str(datename)
+                    )
                     if rpointer_content != "unset":
                         if not ninst_strings:
                             ninst_strings = ["empty"]
@@ -222,17 +239,15 @@ def _archive_rpointer_files(
                                 rpointer_file = rpointer_file.replace(key, value)
                                 rpointer_content = rpointer_content.replace(key, value)
 
-                                # write out the respective files with the correct contents
-                                rpointer_file = os.path.join(
-                                    archive_restdir, rpointer_file
-                                )
-                                logger.info(
-                                    "writing rpointer_file {}".format(rpointer_file)
-                                )
-                                f = open(rpointer_file, "w")
-                                for output in rpointer_content.split(","):
-                                    f.write("{} \n".format(output))
-                                f.close()
+                            # write out the respective files with the correct contents
+                            rpointer_file = os.path.join(archive_restdir, rpointer_file)
+                            logger.info(
+                                "writing rpointer_file {}".format(rpointer_file)
+                            )
+                            f = open(rpointer_file, "w")
+                            for output in rpointer_content.split(","):
+                                f.write("{} \n".format(output))
+                            f.close()
                     else:
                         logger.info(
                             "rpointer_content unset, not creating rpointer file {}".format(
@@ -350,7 +365,7 @@ def _archive_history_files(
             if last_date is None or file_date is None or file_date <= last_date:
                 srcfile = join(rundir, histfile)
                 expect(
-                    os.path.isfile(srcfile),
+                    (os.path.isfile(srcfile) or os.path.isdir(srcfile)),
                     "history file {} does not exist ".format(srcfile),
                 )
                 destfile = join(archive_histdir, histfile)
@@ -414,7 +429,8 @@ def get_histfiles_for_restarts(
                         logger.warning(
                             "WARNING, tried to add a duplicate file to histfiles"
                         )
-                    if os.path.isfile(os.path.join(rundir, histfile)):
+                    hfile = os.path.join(rundir, histfile)
+                    if os.path.isfile(hfile) or os.path.isdir(hfile):
                         histfiles.add(histfile)
                     else:
                         logger.debug(
@@ -626,7 +642,7 @@ def _archive_restarts_date_comp(
                     srcfile = os.path.join(rundir, histfile)
                     destfile = os.path.join(archive_restdir, histfile)
                     expect(
-                        os.path.isfile(srcfile),
+                        os.path.exists(srcfile) or os.path.islink(srcfile),
                         "history restart file {} for last date does not exist ".format(
                             srcfile
                         ),
@@ -644,7 +660,7 @@ def _archive_restarts_date_comp(
                     srcfile = os.path.join(rundir, rfile)
                     destfile = os.path.join(archive_restdir, rfile)
                     expect(
-                        os.path.isfile(srcfile),
+                        os.path.exists(srcfile) or os.path.islink(srcfile),
                         "restart file {} does not exist ".format(srcfile),
                     )
                     logger.info(
@@ -660,7 +676,7 @@ def _archive_restarts_date_comp(
                         srcfile = os.path.join(rundir, histfile)
                         destfile = os.path.join(archive_restdir, histfile)
                         expect(
-                            os.path.isfile(srcfile),
+                            os.path.exists(srcfile) or os.path.islink(srcfile),
                             "hist file {} does not exist ".format(srcfile),
                         )
                         logger.info("copying {} to {}".format(srcfile, destfile))
@@ -721,9 +737,20 @@ def _archive_restarts_date_comp(
                                                 srcfile
                                             )
                                         )
-                                        if os.path.isfile(srcfile):
+                                        if os.path.isfile(srcfile) or os.path.islink(
+                                            srcfile
+                                        ):
                                             try:
                                                 os.remove(srcfile)
+                                            except OSError:
+                                                logger.warning(
+                                                    "unable to remove interim restart file {}".format(
+                                                        srcfile
+                                                    )
+                                                )
+                                        elif os.path.isdir(srcfile):
+                                            try:
+                                                shutil.rmtree(srcfile)
                                             except OSError:
                                                 logger.warning(
                                                     "unable to remove interim restart file {}".format(
@@ -788,9 +815,20 @@ def _archive_restarts_date_comp(
                                                 srcfile
                                             )
                                         )
-                                        if os.path.isfile(srcfile):
+                                        if os.path.isfile(srcfile) or os.path.islink(
+                                            srcfile
+                                        ):
                                             try:
                                                 os.remove(srcfile)
+                                            except OSError:
+                                                logger.warning(
+                                                    "unable to remove interim restart file {}".format(
+                                                        srcfile
+                                                    )
+                                                )
+                                        elif os.path.isdir(srcfile):
+                                            try:
+                                                shutil.rmtree(srcfile)
                                             except OSError:
                                                 logger.warning(
                                                     "unable to remove interim restart file {}".format(
@@ -811,9 +849,18 @@ def _archive_restarts_date_comp(
                     else:
                         srcfile = os.path.join(rundir, rfile)
                         logger.info("removing interim restart file {}".format(srcfile))
-                        if os.path.isfile(srcfile):
+                        if os.path.isfile(srcfile) or os.path.islink(srcfile):
                             try:
                                 os.remove(srcfile)
+                            except OSError:
+                                logger.warning(
+                                    "unable to remove interim restart file {}".format(
+                                        srcfile
+                                    )
+                                )
+                        elif os.path.isdir(srcfile):
+                            try:
+                                shutil.rmtree(srcfile)
                             except OSError:
                                 logger.warning(
                                     "unable to remove interim restart file {}".format(
