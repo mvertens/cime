@@ -28,7 +28,6 @@ from CIME.utils import (
     get_project,
     get_timestamp,
     get_cime_default_driver,
-    clear_folder,
     CIMEError,
 )
 from CIME.config import Config
@@ -62,6 +61,7 @@ PHASES = [
     MODEL_BUILD_PHASE,
     RUN_PHASE,
 ]  # Order matters
+
 
 ###############################################################################
 def _translate_test_names_for_new_pecount(test_names, force_procs, force_threads):
@@ -130,6 +130,8 @@ def _translate_test_names_for_new_pecount(test_names, force_procs, force_threads
 
 
 _TIME_CACHE = {}
+
+
 ###############################################################################
 def _get_time_est(test, baseline_root, as_int=False, use_cache=False, raw=False):
     ###############################################################################
@@ -357,10 +359,7 @@ class TestScheduler(object):
                     if os.path.isdir(test_baseline):
                         existing_baselines.append(test_baseline)
                         if allow_baseline_overwrite and run_count == 0:
-                            if self._namelists_only:
-                                clear_folder(os.path.join(test_baseline, "CaseDocs"))
-                            else:
-                                clear_folder(test_baseline)
+                            pass
                         elif skip_tests_with_existing_baselines:
                             tests_to_skip.append(test_name)
                 expect(
@@ -881,7 +880,7 @@ class TestScheduler(object):
                     envtest.set_test_parameter("USE_ESMF_LIB", "TRUE")
                     logger.debug(" USE_ESMF_LIB set to TRUE")
 
-                elif opt == "CG":
+                elif opt == "cG":
                     envtest.set_test_parameter("CALENDAR", "GREGORIAN")
                     logger.debug(" CALENDAR set to {}".format(opt))
 
