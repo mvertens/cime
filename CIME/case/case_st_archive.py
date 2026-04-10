@@ -1166,7 +1166,7 @@ def case_st_archive(
                 # to the one where are they prohibited by whoever set up slurm configs on HPC 
                 # TODO: add betzy
                 if self.get_value("MACH") in ["olivia"]:
-                    logger.info("remove environment variable")
+                    logger.info("redefine SLURM_MEM_PER_NODE environment variable")
                     os.unsetenv("SLURM_MEM_PER_NODE")
                     os.environ["SLURM_MEM_PER_NODE"]="{}".format(self.get_value("MAX_MEM_PER_NODE")*1024)
                 self.submit(resubmit=True)
