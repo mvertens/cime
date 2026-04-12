@@ -5,6 +5,7 @@
 <xs:attribute name="name"  type="xs:string"/>
 <xs:attribute name="pesize"  type="xs:NCName"/>
 <xs:attribute name="compset"  type="xs:string"/>
+<xs:attribute name="compiler" type="xs:string"/>
 
 <!-- simple elements -->
 <xs:element name="comment" type="xs:string"/>
