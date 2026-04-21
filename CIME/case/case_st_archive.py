@@ -1165,9 +1165,10 @@ def case_st_archive(
                 # this is the only way you can jump from a partition with mem specs allowed 
                 # to the one where are they prohibited by whoever set up slurm configs on HPC 
                 # TODO: add betzy
-                if self.get_value("MACH") in ["olivia"]:
+                if self.get_value("MACH") in ["olivia","betzy"]:
                     logger.info("redefine SLURM_MEM_PER_NODE environment variable")
                     os.unsetenv("SLURM_MEM_PER_NODE")
+                    # this slurm var is in MiB we set MEM_PER_TASK and MAX_MEM_PER_NODE  in GiB
                     os.environ["SLURM_MEM_PER_NODE"]="{}".format(self.get_value("MAX_MEM_PER_NODE")*1024)
                 self.submit(resubmit=True)
 
