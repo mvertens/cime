@@ -112,6 +112,7 @@
     <values>
       <value>$CIMEROOT/CIME/data/config/config_tests.xml</value>
       <!-- component specific config_tests files -->
+      <value component="allactive">$SRCROOT/cime_config/config_tests.xml</value>
       <value component="clm">$COMP_ROOT_DIR_LND/cime_config/config_tests.xml</value>
       <value component="slim">$COMP_ROOT_DIR_LND/cime_config/config_tests.xml</value>
       <value component="cam">$COMP_ROOT_DIR_ATM/cime_config/config_tests.xml</value>
@@ -133,7 +134,7 @@
     <values>
       <value component="datm"  >$SRCROOT/components/cdeps/datm</value>
       <value component="satm"  >$CIMEROOT/CIME/non_py/src/components/stub_comps_$COMP_INTERFACE/satm</value>
-      <value component="xatm"  >$CIMEROOT/CIME/non_py/src/components/xcpl_comps_$COMP_INTERFACE/xatm</value>
+      <value component="xatm"  >$SRCROOT/components/cmeps/med_test_comps/xatm</value>
 
       <value component="cam"                         >$SRCROOT/components/cam/</value>
       <value component="ufsatm"                      >$SRCROOT/components/fv3/</value>
@@ -168,7 +169,7 @@
       <value component="blom"                         >$SRCROOT/components/blom/</value>
       <value component="docn"   >$SRCROOT/components/cdeps/docn</value>
       <value component="socn"   >$CIMEROOT/CIME/non_py/src/components/stub_comps_$COMP_INTERFACE/socn</value>
-      <value component="xocn"   >$CIMEROOT/CIME/non_py/src/components/xcpl_comps_$COMP_INTERFACE/xocn</value>
+      <value component="xocn"   >$SRCROOT/components/cmeps/med_test_comps/xocn</value>
     </values>
     <group>case_comps</group>
     <file>env_case.xml</file>
@@ -183,7 +184,7 @@
       <value component="ww3"   >$SRCROOT/components/ww3/</value>
       <value component="dwav"  >$SRCROOT/components/cdeps/dwav</value>
       <value component="swav"  >$CIMEROOT/CIME/non_py/src/components/stub_comps_$COMP_INTERFACE/swav</value>
-      <value component="xwav"  >$CIMEROOT/CIME/non_py/src/components/xcpl_comps_$COMP_INTERFACE/xwav</value>
+      <value component="xwav"  >$SRCROOT/components/cmeps/med_test_comps/xwav</value>
     </values>
     <group>case_comps</group>
     <file>env_case.xml</file>
@@ -198,7 +199,7 @@
       <value component="cism"                        >$SRCROOT/components/cism/</value>
       <value component="dglc"  >$SRCROOT/components/cdeps/dglc</value>
       <value component="sglc"  >$CIMEROOT/CIME/non_py/src/components/stub_comps_$COMP_INTERFACE/sglc</value>
-      <value component="xglc"  >$CIMEROOT/CIME/non_py/src/components/xcpl_comps_$COMP_INTERFACE/xglc</value>
+      <value component="xglc"  >$SRCROOT/components/cmeps/med_test_comps/xglc</value>
     </values>
     <group>case_comps</group>
     <file>env_case.xml</file>
@@ -215,7 +216,7 @@
       <value component="mpassi"                      >$SRCROOT/components/mpas-seaice/</value>
       <value component="dice"  >$SRCROOT/components/cdeps/dice</value>
       <value component="sice"  >$CIMEROOT/CIME/non_py/src/components/stub_comps_$COMP_INTERFACE/sice</value>
-      <value component="xice"  >$CIMEROOT/CIME/non_py/src/components/xcpl_comps_$COMP_INTERFACE/xice</value>
+      <value component="xice"  >$SRCROOT/components/cmeps/med_test_comps/xice</value>
     </values>
     <group>case_comps</group>
     <file>env_case.xml</file>
@@ -232,7 +233,7 @@
       <value component="mizuroute"                   >$SRCROOT/components/mizuRoute/</value>
       <value component="drof"  >$SRCROOT/components/cdeps/drof</value>
       <value component="srof"  >$CIMEROOT/CIME/non_py/src/components/stub_comps_$COMP_INTERFACE/srof</value>
-      <value component="xrof"  >$CIMEROOT/CIME/non_py/src/components/xcpl_comps_$COMP_INTERFACE/xrof</value>
+      <value component="xrof"  >$SRCROOT/components/cmeps/med_test_comps/xrof</value>
     </values>
     <group>case_comps</group>
     <file>env_case.xml</file>
@@ -248,7 +249,7 @@
       <value component="slim"                        >$SRCROOT/components/slim/</value>
       <value component="dlnd"  >$SRCROOT/components/cdeps/dlnd</value>
       <value component="slnd"  >$CIMEROOT/CIME/non_py/src/components/stub_comps_$COMP_INTERFACE/slnd</value>
-      <value component="xlnd"  >$CIMEROOT/CIME/non_py/src/components/xcpl_comps_$COMP_INTERFACE/xlnd</value>
+      <value component="xlnd"  >$SRCROOT/components/cmeps/med_test_comps/xlnd</value>
     </values>
     <group>case_comps</group>
     <file>env_case.xml</file>
@@ -261,7 +262,7 @@
     <default_value>unset</default_value>
     <values>
       <value component="siac"  >$CIMEROOT/CIME/non_py/src/components/stub_comps_$COMP_INTERFACE/siac</value>
-      <value component="xiac"  >$CIMEROOT/CIME/non_py/src/components/xcpl_comps_$COMP_INTERFACE/xiac</value>
+      <value component="xiac"  >$SRCROOT/components/cmeps/med_test_comps/xiac</value>
     </values>
     <group>case_comps</group>
     <file>env_case.xml</file>
@@ -371,6 +372,7 @@
     <type>char</type>
     <values>
       <value component="any"       >$CIMEROOT/CIME/SystemTests</value>
+      <value component="allactive" >$SRCROOT/cime_config/SystemTests</value>
       <value component="clm"       >$COMP_ROOT_DIR_LND/cime_config/SystemTests</value>
       <value component="cam"       >$COMP_ROOT_DIR_ATM/cime_config/SystemTests</value>
       <value component="pop"       >$COMP_ROOT_DIR_OCN/cime_config/SystemTests</value>

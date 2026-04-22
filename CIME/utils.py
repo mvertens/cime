@@ -2267,7 +2267,7 @@ def find_system_test(testname, case):
     if testname.startswith("TEST"):
         system_test_path = "CIME.SystemTests.system_tests_common.{}".format(testname)
     else:
-        components = ["any"]
+        components = ["any", "allactive"]
         components.extend(case.get_compset_components())
         fdir = []
         for component in components:
@@ -2276,6 +2276,11 @@ def find_system_test(testname, case):
             )
             if tdir is not None:
                 tdir = os.path.abspath(tdir)
+                if tdir in fdir:
+                    # This can happen if multiple SYSTEM_TESTS_DIRs resolve to the same
+                    # path; in this case, we just want to handle the first occurrence and
+                    # skip the rest.
+                    continue
                 system_test_file = os.path.join(tdir, "{}.py".format(testname.lower()))
                 if os.path.isfile(system_test_file):
                     fdir.append(tdir)
@@ -2692,6 +2697,7 @@ def is_comp_standalone(case):
     """
     stubcnt = 0
     classes = case.get_values("COMP_CLASSES")
+    model = "cpl"
     for comp in classes:
         if case.get_value("COMP_{}".format(comp)) == "s{}".format(comp.lower()):
             stubcnt = stubcnt + 1
@@ -2700,4 +2706,4 @@ def is_comp_standalone(case):
     numclasses = len(classes)
     if stubcnt >= numclasses - 2:
         return True, model
-    return False, get_model()
+    return False, None
